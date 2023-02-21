@@ -1,0 +1,14 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "BestToDo",
+      "type": "lldb",
+      "request": "launch",
+      "preLaunchTask": "cargo build",
+      "program": "${workspaceRoot}/target/debug/best_todo",
+      "args": [],
+      "cwd": "${workspaceRoot}"
+    }
+  ]
+}

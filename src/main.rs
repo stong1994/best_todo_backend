@@ -1,7 +1,16 @@
-use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
+use actix_web::{get, post, put, patch, web, App, HttpResponse, HttpServer, Responder, middleware};
 use serde::{Deserialize, Serialize};
 use std::sync::{Arc, Mutex};
 use uuid::Uuid;
+use env_logger::Env;
+
+
+#[derive(Debug, Deserialize, Clone)]
+struct CreateTask {
+    title: String,
+    is_important: bool,
+    is_urgent: bool,
+}
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 struct Task {
@@ -75,13 +84,13 @@ async fn get_tasks(state: web::Data<AppState>) -> impl Responder {
 }
 
 #[post("/tasks")]
-async fn add_task(state: web::Data<AppState>, task: web::Json<Task>) -> impl Responder {
+async fn add_task(state: web::Data<AppState>, task: web::Json<CreateTask>) -> impl Responder {
     let mut task_data = state.task_data.lock().unwrap();
     let new_task = task_data.add_task(task.title.clone(), task.is_important, task.is_urgent);
     HttpResponse::Ok().json(new_task)
 }
 
-#[post("/tasks/{id}")]
+#[put("/tasks/{id}")]
 async fn update_task(state: web::Data<AppState>, task: web::Json<Task>, id: web::Path<String>) -> impl Responder {
     let mut task_data = state.task_data.lock().unwrap();
     let mut task = task.into_inner();
@@ -93,7 +102,7 @@ async fn update_task(state: web::Data<AppState>, task: web::Json<Task>, id: web:
     }
 }
 
-#[post("/tasks/{id}/done")]
+#[patch("/tasks/{id}/done")]
 async fn complete_task(state: web::Data<AppState>, id: web::Path<String>) -> impl Responder {
     let mut task_data = state.task_data.lock().unwrap();
     if let Some(task) = task_data.tasks.iter_mut().find(|t| t.id == id.to_string()) {
@@ -106,10 +115,13 @@ async fn complete_task(state: web::Data<AppState>, id: web::Path<String>) -> imp
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    env_logger::init_from_env(Env::default().default_filter_or("info"));
+
     let addr = "127.0.0.1:8080";
     let task_data = Arc::new(Mutex::new(TaskData::new()));
     println!("Server listening on {}", addr);
     HttpServer::new(move || App::new()
+    .wrap(middleware::Logger::default())
     .data(AppState{
         task_data: task_data.clone(),
     })

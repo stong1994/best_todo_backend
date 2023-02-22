@@ -27,12 +27,12 @@ async fn main() -> anyhow::Result<()> {
     let binding_address = format!("{}:{}", config.host, config.port);
     HttpServer::new(|| {
         App::new()
-            .app_data(web::Json::<Task>::configure(|cfg| {
-                cfg.error_handler(|err, req| {
-                    log::error!("json extractor error, path={}, {}", req.uri(), err);
-                    BusinessError::ArgumentError.into()
-                })
-            }))
+            // .app_data(web::Json::<Task>::configure(|cfg| {
+            //     cfg.error_handler(|err, req| {
+            //         log::error!("json extractor error, path={}, {}", req.uri(), err);
+            //         BusinessError::ArgumentError.into()
+            //     })
+            // }))
             .service(
                 web::scope("/tasks")
                     .route("", web::get().to(task::list_task))

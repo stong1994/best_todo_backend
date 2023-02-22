@@ -2,7 +2,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "BestToDo",
+      "name": "best_todo",
       "type": "lldb",
       "request": "launch",
       "preLaunchTask": "cargo build",

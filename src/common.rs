@@ -169,7 +169,7 @@ fn default_port() -> u16 {
 }
 
 fn default_mongodb_uri() -> String {
-    "mongodb://localhost:27017".to_string()
+    "mongodb://127.0.0.1:27017".to_string()
 }
 
 pub fn load_config(path: impl AsRef<Path>) -> anyhow::Result<TaskConfig> {

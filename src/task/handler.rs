@@ -18,26 +18,27 @@ pub async fn save_task(task: web::Json<Task>) -> RespResult {
     Resp::ok(id).to_json_result()
 }
 
-pub async fn list_task(query: web::Json<TaskQuery>) -> RespResult {
-    let query = query.into_inner();
+pub async fn list_task() -> RespResult {
+    // let query = query.into_inner();
 
-    // 构造查询参数
-    let mut filter: Document = doc! {};
-    if query._id.is_some() {
-        filter.insert("_id", query._id.unwrap());
-    }
+    // // 构造查询参数
+    // let mut filter: Document = doc! {};
+    // if query._id.is_some() {
+    //     filter.insert("_id", query._id.unwrap());
+    // }
 
-    // 关键字模糊查询
-    if !query.keyword.is_empty() {
-        filter.insert(
-            "$or",
-            bson::Bson::Array(vec![
-                doc! {"title": {"$regex": & query.keyword, "$options": "i"}}.into(),
-            ]),
-        );
-    }
+    // // 关键字模糊查询
+    // if !query.keyword.is_empty() {
+    //     filter.insert(
+    //         "$or",
+    //         bson::Bson::Array(vec![
+    //             doc! {"title": {"$regex": & query.keyword, "$options": "i"}}.into(),
+    //         ]),
+    //     );
+    // }
 
-    let list = TASK_SERVICE.list_with_filter(filter).await?;
+    // let list = TASK_SERVICE.list_with_filter(filter).await?;
+    let list = TASK_SERVICE.list_all().await?;
     Resp::ok(list).to_json_result()
 }
 

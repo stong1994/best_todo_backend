@@ -16,6 +16,11 @@ where
 {
     fn table(&self) -> Collection;
 
+    async fn list_all(&self) -> mongodb::error::Result<Vec<T>> {
+        let cursor = self.table().find(None, None).await?;
+        Ok(cursor.into_vec::<T>().await)
+    }
+
     async fn list_with_filter(&self, filter: Document) -> mongodb::error::Result<Vec<T>> {
         let cursor = self.table().find(Some(filter), None).await?;
         Ok(cursor.into_vec::<T>().await)

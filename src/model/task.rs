@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize, Serializer};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Task {
-    #[serde(rename = "_id", skip_serializing_if = "Option::is_none", serialize_with = "serialize_object_id")]
+    #[serde(rename(serialize = "id", deserialize = "_id"), skip_serializing_if = "Option::is_none", serialize_with = "serialize_object_id")]
     pub id: Option<ObjectId>,
     pub title: String,
     pub is_done: bool,

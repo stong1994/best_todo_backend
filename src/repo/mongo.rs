@@ -3,6 +3,7 @@ extern crate dotenv;
 use dotenv::dotenv;
 
 use crate::model::task::Task;
+use crate::model::error::MyError;
 use mongodb::{
     bson::{extjson::de::Error, oid::ObjectId, doc},
     results::{InsertOneResult, UpdateResult, DeleteResult},
@@ -43,8 +44,19 @@ impl MongoRepo {
         Ok(task)
     }
 
-    pub fn get_task(&self, id: &String) -> Result<Task, Error> {
+    pub fn get_task(&self, id: &String) -> Result<Task, MyError> {
         let obj_id = ObjectId::parse_str(id).unwrap();
+        let filter = doc! {"_id": obj_id};
+        let task_detail = self
+            .col
+            .find_one(filter, None)
+            .map_err(MyError::MongoDBError)?.ok_or(MyError::NotFound)?;
+            // .ok()
+            // .expect("Error getting task's detail");
+        Ok(task_detail)
+    }
+
+    pub fn get_task_by_objid(&self, obj_id: ObjectId) -> Result<Task, Error> {
         let filter = doc! {"_id": obj_id};
         let task_detail = self
             .col

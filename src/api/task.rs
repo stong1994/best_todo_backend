@@ -1,3 +1,5 @@
+use std::str::FromStr;
+
 use crate::{model::task::Task, repo::mongo::MongoRepo};
 use mongodb::{bson::oid::ObjectId, results::InsertOneResult};
 use rocket::{http::Status, serde::json::Json, State};
@@ -6,7 +8,7 @@ use rocket::{http::Status, serde::json::Json, State};
 pub fn create_task(
     db: &State<MongoRepo>,
     new_task: Json<Task>,
-) -> Result<Json<InsertOneResult>, Status> {
+) -> Result<Json<Task>, Status> {
     let data = Task {
         id: None,
         title: new_task.title.to_owned(),
@@ -16,14 +18,19 @@ pub fn create_task(
     };
     let task_detail = db.create_task(data);
     match task_detail {
-        Ok(task) => Ok(Json(task)),
+        Ok(id) => {
+            let task_detail = db.get_task_by_objid(id.inserted_id.as_object_id().unwrap().clone());
+            match task_detail {
+                Ok(task) => Ok(Json(task)),
+                Err(_) => Err(Status::InternalServerError),
+            }
+        },
         Err(_) => Err(Status::InternalServerError),
     }
 }
 
-#[get("/task/<path>")]
-pub fn get_task(db: &State<MongoRepo>, path: String) -> Result<Json<Task>, Status> {
-    let id = path;
+#[get("/task/<id>")]
+pub fn get_task(db: &State<MongoRepo>, id: String) -> Result<Json<Task>, Status> {
     if id.is_empty() {
         return Err(Status::BadRequest);
     };
@@ -34,13 +41,12 @@ pub fn get_task(db: &State<MongoRepo>, path: String) -> Result<Json<Task>, Statu
     }
 }
 
-#[put("/task/<path>", data = "<new_task>")]
+#[put("/task/<id>", data = "<new_task>")]
 pub fn update_task(
     db: &State<MongoRepo>,
-    path: String,
+    id: String,
     new_task: Json<Task>,
 ) -> Result<Json<Task>, Status> {
-    let id = path;
     if id.is_empty() {
         return Err(Status::BadRequest);
     };
@@ -68,9 +74,8 @@ pub fn update_task(
     }
 }
 
-#[delete("/task/<path>")]
-pub fn delete_task(db: &State<MongoRepo>, path: String) -> Result<Json<&str>, Status> {
-    let id = path;
+#[delete("/task/<id>")]
+pub fn delete_task(db: &State<MongoRepo>, id: String) -> Result<Json<&str>, Status> {
     if id.is_empty() {
         return Err(Status::BadRequest);
     };

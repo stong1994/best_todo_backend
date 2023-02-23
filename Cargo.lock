@@ -290,6 +290,7 @@ dependencies = [
  "mongodb",
  "rocket",
  "serde",
+ "thiserror",
 ]
 
 [[package]]

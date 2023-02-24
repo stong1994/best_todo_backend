@@ -98,10 +98,11 @@ impl MongoRepo {
         Ok(task_detail)
     }
 
-    pub fn get_all_tasks(&self) -> Result<Vec<Task>, Error> {
+    pub fn get_all_tasks(&self, important: Option<bool>, urgent: Option<bool>) -> Result<Vec<Task>, Error> {
+        let filter = doc! {"is_important": important, "is_urgent": urgent};
         let cursors = self
             .col
-            .find(None, None)
+            .find(filter, None)
             .ok()
             .expect("Error getting list of tasks");
         let tasks = cursors.map(|doc| doc.unwrap()).collect();

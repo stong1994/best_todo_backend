@@ -1,5 +1,3 @@
-use std::str::FromStr;
-
 use crate::{model::task::Task, repo::mongo::MongoRepo};
 use mongodb::{bson::oid::ObjectId, results::InsertOneResult};
 use rocket::{http::Status, serde::json::Json, State};
@@ -92,9 +90,9 @@ pub fn delete_task(db: &State<MongoRepo>, id: String) -> Result<Json<&str>, Stat
     }
 }
 
-#[get("/tasks")]
-pub fn get_all_tasks(db: &State<MongoRepo>) -> Result<Json<Vec<Task>>, Status> {
-    let tasks = db.get_all_tasks();
+#[get("/tasks?<important>&<urgent>")]
+pub fn get_all_tasks(db: &State<MongoRepo>, important: Option<bool>, urgent: Option<bool>) -> Result<Json<Vec<Task>>, Status> {
+    let tasks = db.get_all_tasks(important, urgent);
     match tasks {
         Ok(tasks) => Ok(Json(tasks)),
         Err(_) => Err(Status::InternalServerError),

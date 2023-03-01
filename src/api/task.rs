@@ -90,6 +90,17 @@ pub fn delete_task(db: &State<MongoRepo>, id: String) -> Result<Json<&str>, Stat
     }
 }
 
+#[delete("/tasks")]
+pub fn delete_tasks(db: &State<MongoRepo>) -> Result<Json<&str>, Status> {
+    let result = db.delete_tasks();
+    match result {
+        Ok(_res) => {
+            return Ok(Json("task successfully deleted!"));
+        }
+        Err(_) => Err(Status::InternalServerError),
+    }
+}
+
 #[get("/tasks?<important>&<urgent>")]
 pub fn get_all_tasks(db: &State<MongoRepo>, important: Option<bool>, urgent: Option<bool>) -> Result<Json<Vec<Task>>, Status> {
     let tasks = db.get_all_tasks(important, urgent);

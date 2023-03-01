@@ -98,6 +98,16 @@ impl MongoRepo {
         Ok(task_detail)
     }
 
+    pub fn delete_tasks(&self) -> Result<DeleteResult, Error> {
+        let filter = doc! {};
+        let rst = self
+            .col
+            .delete_many(filter, None)
+            .ok()
+            .expect("Error deleting tasks");
+        Ok(rst)
+    }
+
     pub fn get_all_tasks(&self, important: Option<bool>, urgent: Option<bool>) -> Result<Vec<Task>, Error> {
         let filter = doc! {"is_important": important, "is_urgent": urgent};
         let cursors = self
